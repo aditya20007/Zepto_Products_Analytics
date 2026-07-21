@@ -1,5 +1,5 @@
 import streamlit as st
-st.write("PAGE LOADED")
+
 from utils.load_data import (
     get_products,
     get_product_count,
