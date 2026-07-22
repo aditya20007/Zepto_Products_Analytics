@@ -4,6 +4,7 @@ load_data.py
 Utility functions for loading data from PostgreSQL.
 """
 
+import os
 import pandas as pd
 import streamlit as st
 from sqlalchemy import text
@@ -19,43 +20,55 @@ from utils.queries import QUERIES
 @st.cache_data(ttl=600)
 def execute_query(query_name):
     """
-    Execute SQL query stored in QUERIES dictionary.
+    Execute SQL query from QUERIES dictionary.
     """
 
     try:
         engine = get_engine()
 
         if engine is None:
-            st.error("❌ Database engine could not be created.")
+            st.error("Database engine could not be created.")
             return pd.DataFrame()
 
         query = QUERIES.get(query_name)
 
         if query is None:
-            st.error(f"❌ Query '{query_name}' not found.")
+            st.error(f"Query '{query_name}' not found.")
             return pd.DataFrame()
 
         with engine.connect() as conn:
             df = pd.read_sql(text(query), conn)
 
+        # ===========================
+        # Debug Output
+        # ===========================
+        print("\n===================================")
+        print("Query Name:", query_name)
+        print("Rows:", len(df))
+        print("Columns:", df.columns.tolist())
+
+        if not df.empty:
+            print(df.head())
+        else:
+            print("DataFrame is EMPTY")
+
+        print("===================================\n")
+
         return df
 
     except Exception as e:
-        st.error(f"❌ Database Error:\n\n{e}")
+        st.error(f"Database Error:\n\n{e}")
+        print("Database Error:", e)
         return pd.DataFrame()
-
-
-# =====================================================
-# Load Complete Dataset
-# =====================================================
-
-def load_data():
-    return execute_query("all_products")
 
 
 # =====================================================
 # Products
 # =====================================================
+
+def load_data():
+    return execute_query("all_products")
+
 
 def get_products():
     return execute_query("all_products")
@@ -70,7 +83,7 @@ def get_kpis():
 
 
 # =====================================================
-# Category Distribution
+# Category
 # =====================================================
 
 def get_category_distribution():
@@ -118,7 +131,7 @@ def get_product_weight():
 
 
 # =====================================================
-# Top Expensive Products
+# Expensive Products
 # =====================================================
 
 def get_top_expensive():
@@ -134,7 +147,7 @@ def get_cheapest():
 
 
 # =====================================================
-# Highest Discount Products
+# Highest Discount
 # =====================================================
 
 def get_top_discount():
@@ -142,7 +155,7 @@ def get_top_discount():
 
 
 # =====================================================
-# Low Stock Products
+# Low Stock
 # =====================================================
 
 def get_low_stock():
@@ -150,7 +163,7 @@ def get_low_stock():
 
 
 # =====================================================
-# Out Of Stock Products
+# Out Of Stock
 # =====================================================
 
 def get_out_of_stock():
