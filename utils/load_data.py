@@ -4,20 +4,12 @@ load_data.py
 Utility functions for loading data from PostgreSQL.
 """
 
-import os
 import pandas as pd
 import streamlit as st
 from sqlalchemy import text
 
 from utils.database import get_engine
 from utils.queries import QUERIES
-
-# Debug Environment Variables
-print("DB_HOST =", os.getenv("DB_HOST"))
-print("DB_PORT =", os.getenv("DB_PORT"))
-print("DB_NAME =", os.getenv("DB_NAME"))
-print("DB_USER =", os.getenv("DB_USER"))
-print("DB_PASSWORD =", os.getenv("DB_PASSWORD"))
 
 
 # =====================================================
@@ -27,55 +19,43 @@ print("DB_PASSWORD =", os.getenv("DB_PASSWORD"))
 @st.cache_data(ttl=600)
 def execute_query(query_name):
     """
-    Execute SQL query from QUERIES dictionary.
+    Execute SQL query stored in QUERIES dictionary.
     """
 
     try:
         engine = get_engine()
 
         if engine is None:
-            st.error("Database engine could not be created.")
+            st.error("❌ Database engine could not be created.")
             return pd.DataFrame()
 
         query = QUERIES.get(query_name)
 
         if query is None:
-            st.error(f"Query '{query_name}' not found.")
+            st.error(f"❌ Query '{query_name}' not found.")
             return pd.DataFrame()
 
         with engine.connect() as conn:
             df = pd.read_sql(text(query), conn)
 
-        # ===========================
-        # Debug Output
-        # ===========================
-        print("\n===================================")
-        print("Query Name:", query_name)
-        print("Rows:", len(df))
-        print("Columns:", df.columns.tolist())
-
-        if not df.empty:
-            print(df.head())
-        else:
-            print("DataFrame is EMPTY")
-
-        print("===================================\n")
-
         return df
 
     except Exception as e:
-        st.error(f"Database Error:\n\n{e}")
-        print("Database Error:", e)
+        st.error(f"❌ Database Error:\n\n{e}")
         return pd.DataFrame()
 
 
 # =====================================================
-# Products
+# Load Complete Dataset
 # =====================================================
 
 def load_data():
     return execute_query("all_products")
 
+
+# =====================================================
+# Products
+# =====================================================
 
 def get_products():
     return execute_query("all_products")
@@ -90,7 +70,7 @@ def get_kpis():
 
 
 # =====================================================
-# Category
+# Category Distribution
 # =====================================================
 
 def get_category_distribution():
@@ -138,7 +118,7 @@ def get_product_weight():
 
 
 # =====================================================
-# Expensive Products
+# Top Expensive Products
 # =====================================================
 
 def get_top_expensive():
@@ -154,7 +134,7 @@ def get_cheapest():
 
 
 # =====================================================
-# Highest Discount
+# Highest Discount Products
 # =====================================================
 
 def get_top_discount():
@@ -162,7 +142,7 @@ def get_top_discount():
 
 
 # =====================================================
-# Low Stock
+# Low Stock Products
 # =====================================================
 
 def get_low_stock():
@@ -170,7 +150,7 @@ def get_low_stock():
 
 
 # =====================================================
-# Out Of Stock
+# Out Of Stock Products
 # =====================================================
 
 def get_out_of_stock():
