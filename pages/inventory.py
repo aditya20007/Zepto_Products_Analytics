@@ -36,6 +36,18 @@ st.divider()
 # -------------------------------------------------
 
 df = load_data()
+if df.empty:
+    st.error("Unable to load product data from the database.")
+    st.stop()
+
+required_columns = ["category", "availablequantity", "outofstock"]
+
+missing = [col for col in required_columns if col not in df.columns]
+
+if missing:
+    st.error(f"Missing columns: {missing}")
+    st.write("Available columns:", df.columns.tolist())
+    st.stop()
 
 inventory = get_inventory()
 
